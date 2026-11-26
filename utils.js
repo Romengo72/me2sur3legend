@@ -204,16 +204,20 @@ async function createSession(email, req, res) {
   const secure = IS_PRODUCTION ? isHttps : false;
 
   res.cookie('auth_token', token, {
-    httpOnly: true, sameSite: 'lax', secure,
-    maxAge: SESSION_TTL_MS, path: '/', domain: COOKIE_DOMAIN
-  });
+  httpOnly: true,
+  sameSite: 'none',
+  secure: true,
+  maxAge: SESSION_TTL_MS,
+  path: '/'
+});
 
-  /* Régénère le token CSRF à chaque login (anti-replay) */
-  const csrfToken = crypto.randomBytes(32).toString('hex');
-  res.cookie('csrf_token', csrfToken, {
-    httpOnly: false, sameSite: 'lax', secure,
-    maxAge: SESSION_TTL_MS, path: '/', domain: COOKIE_DOMAIN
-  });
+res.cookie('csrf_token', csrfToken, {
+  httpOnly: false,
+  sameSite: 'none',
+  secure: true,
+  maxAge: SESSION_TTL_MS,
+  path: '/'
+});
 
   return token;
 }

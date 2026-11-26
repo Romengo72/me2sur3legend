@@ -2,20 +2,24 @@
   "appId": "com.me2sur3legend.app",
   "appName": "Me2sur3Legend",
   "webDir": "www",
+  "plugins": {
+  "CapacitorHttp": { "enabled": true }
+    },
   "server": {
-    "url": "https://meadowless-dannie-nonepigrammatic.ngrok-free.dev",
-    "cleartext": true,
+    "url": "https://me2sur3legend.onrender.com",
+    "cleartext": false,
     "allowNavigation": [
-      "meadowless-dannie-nonepigrammatic.ngrok-free.dev",
+      "me2sur3legend.onrender.com",
       "api.cinetpay.co",
       "api.cinetpay.net",
       "checkout.cinetpay.co",
       "checkout.cinetpay.net"
-    ]
+    ],
+    "androidScheme": "https"
   },
   "android": {
-    "allowMixedContent": true,
+    "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true
+    "webContentsDebuggingEnabled": false
   }
 }

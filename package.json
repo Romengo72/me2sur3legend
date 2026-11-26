@@ -16,6 +16,7 @@
     "@capacitor/android": "^8.6.2",
     "@capacitor/cli": "^8.6.0",
     "@capacitor/core": "^8.6.0",
+    "@capacitor/http": "^0.0.2",
     "@google-cloud/translate": "^10.3.0",
     "bcryptjs": "^2.4.3",
     "cinetpay-js": "^0.1.1",

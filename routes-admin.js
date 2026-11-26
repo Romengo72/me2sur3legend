@@ -5,6 +5,7 @@ const { pool } = require('./db');
 const { authenticateToken, requireAdmin, requirePermission, logSecurity } = require('./utils');
 const { calculerGainAvecMarge } = require('./calculs-server');
 const logger = require('./logger');
+const { sendPayout } = require('./payout');
 
 const router = express.Router();
 router.use(authenticateToken, requireAdmin);
@@ -418,7 +419,7 @@ router.post('/withdrawals/:id/approve', async (req, res) => {
 
     const row = w.rows[0];
     const userEmail = row.user_email;
-    const montant = Number(row.amount);   /* montant net demandé */
+    const montant = Number(row.amount);
 
     const u = await client.query(`SELECT balance, category FROM users WHERE email = $1 FOR UPDATE`, [userEmail]);
     if (!u.rows.length) throw new Error('Utilisateur introuvable');
@@ -427,29 +428,35 @@ router.post('/withdrawals/:id/approve', async (req, res) => {
     const category = u.rows[0].category || 'free';
     const fee = { free: 0.05, premium: 0.03, vip: 0.025, legendaire: 0.025 }[category] || 0.05;
 
-    const fraisVisibles = Number((montant * fee).toFixed(2));
-    const montantDebite = Number((montant + fraisVisibles).toFixed(2));
+    const fraisVisibles = montant * fee;
+    const montantDebite = montant + fraisVisibles;
 
     if (balance < montantDebite) {
       await client.query('ROLLBACK');
-      return res.status(400).json({
-        error: `Solde insuffisant : ${balance.toFixed(2)} XAF dispo, ${montantDebite.toFixed(2)} requis (net ${montant.toFixed(2)} + frais ${fraisVisibles.toFixed(2)}).`
-      });
+      return res.status(400).json({ error: `Solde insuffisant : ${balance.toFixed(2)} XAF dispo, ${montantDebite.toFixed(2)} requis.` });
     }
 
     await client.query(`UPDATE users SET balance = balance - $1, updated_at = NOW() WHERE email = $2`, [montantDebite, userEmail]);
     await client.query(
       `INSERT INTO transactions(user_email, type, montant_eur, devise_origine, note) VALUES ($1, 'withdraw', $2, $3, $4)`,
-      [userEmail, -montantDebite, row.devise,
-       `Retrait approuve (net ${montant.toFixed(2)} + frais ${fraisVisibles.toFixed(2)} = ${montantDebite.toFixed(2)})`]);
+      [userEmail, -montantDebite, row.devise, `Retrait approuve (montant ${montant} + frais ${fraisVisibles.toFixed(2)})`]);
 
-    await client.query(`UPDATE withdrawal_audit SET statut = 'success', raison = 'admin_approved' WHERE id = $1`, [row.id]);
+    const payoutTxid = 'PAYADM-' + row.id + '-' + Date.now();
+    await client.query(`UPDATE withdrawal_audit SET statut = 'processing', payout_txid = $1 WHERE id = $2`, [payoutTxid, row.id]);
     await client.query('COMMIT');
 
-    await logSecurity({ email: req.user.email, event: 'admin_approve_withdrawal', severity: 'warn', ip: req.ip,
-      details: { withdrawal_id: row.id, user: userEmail, montant_net: montant, frais: fraisVisibles, total_debite: montantDebite } });
+    // ⭐ Payout réel
+    const payoutResult = await sendPayout(userEmail, montant, row.devise, payoutTxid, row.phone);
 
-    res.json({ ok: true, message: `Retrait de ${montant.toFixed(2)} XAF approuve (total debite : ${montantDebite.toFixed(2)} XAF).` });
+    if (payoutResult.ok) {
+      await pool.query(`UPDATE withdrawal_audit SET statut = 'success', raison = 'admin_approved_and_paid' WHERE id = $1`, [row.id]);
+      await logSecurity({ email: req.user.email, event: 'admin_approve_withdrawal', severity: 'warn', ip: req.ip, details: { withdrawal_id: row.id, user: userEmail, montant } });
+      res.json({ ok: true, message: `Retrait de ${montant.toFixed(2)} XAF approuve et envoye.` });
+    } else {
+      await pool.query(`UPDATE withdrawal_audit SET statut = 'failed_payout', raison = $1 WHERE id = $2`, [payoutResult.error.slice(0,100), row.id]);
+      await logSecurity({ email: req.user.email, event: 'admin_approve_withdrawal_payout_failed', severity: 'critical', ip: req.ip, details: { withdrawal_id: row.id, user: userEmail, montant, error: payoutResult.error } });
+      res.status(500).json({ error: `Retrait debite mais echec Payout : ${payoutResult.error}. Regularisez manuellement.` });
+    }
   } catch (e) {
     try { await client.query('ROLLBACK'); } catch (_) {}
     res.status(400).json({ error: e.message });

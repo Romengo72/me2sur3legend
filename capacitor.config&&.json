@@ -1,0 +1,21 @@
+{
+  "appId": "com.me2sur3legend.app",
+  "appName": "Me2sur3Legend",
+  "webDir": "www",
+  "server": {
+    "url": "https://meadowless-dannie-nonepigrammatic.ngrok-free.dev",
+    "cleartext": true,
+    "allowNavigation": [
+      "meadowless-dannie-nonepigrammatic.ngrok-free.dev",
+      "api.cinetpay.co",
+      "api.cinetpay.net",
+      "checkout.cinetpay.co",
+      "checkout.cinetpay.net"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}

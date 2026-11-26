@@ -849,4 +849,29 @@ router.post('/payment/notify', async (req, res) => {
   }
 });
 
+router.post('/payment/notify-payout', async (req, res) => {
+  try {
+    const data = req.body || {};
+    const transactionId = data.transaction_id || data.cpm_trans_id || data.merchant_transaction_id;
+    const status = String(data.status || '').toUpperCase();
+    if (!transactionId) return res.status(400).send('BAD_REQUEST');
+
+    if (['ACCEPTED', 'SUCCESS', 'OK', 'PAID', '00'].includes(status)) {
+      await pool.query(
+        `UPDATE withdrawal_audit SET statut = 'success' WHERE payout_txid = $1 AND statut = 'processing'`,
+        [transactionId]);
+      logger.info(`[Payout Notify] ✅ Confirmé : ${transactionId}`);
+    } else if (['FAILED', 'REJECTED', 'ERROR'].includes(status)) {
+      await pool.query(
+        `UPDATE withdrawal_audit SET statut = 'failed_payout', raison = 'Rejeté par CinetPay' WHERE payout_txid = $1 AND statut = 'processing'`,
+        [transactionId]);
+      logger.error(`[Payout Notify] ❌ Échec : ${transactionId}`);
+    }
+    return res.status(200).send('OK');
+  } catch (e) {
+    logger.error('[Payout Notify]', e.message);
+    return res.status(500).send('ERROR');
+  }
+});
+
 module.exports = router;

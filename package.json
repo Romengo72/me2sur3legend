@@ -1,0 +1,71 @@
+{
+  "name": "MePariSportifs",
+  "version": "6.2.9",
+  "description": "Me2/3Legend — Paris sportifs intelligents | 2 gagnants sur 3",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "start:desktop": "electron .",
+    "build:setup": "electron-builder --win portable"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@google-cloud/translate": "^10.3.0",
+    "bcryptjs": "^2.4.3",
+    "cinetpay-js": "^0.1.1",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0",
+    "nodemailer": "^6.9.15",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.me2sur3legend.desktop",
+    "productName": "Me2sur3Legend",
+    "artifactName": "Me2sur3Legend-Setup-${version}.${ext}",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "db.js",
+      "logger.js",
+      "templates.js",
+      "utils.js",
+      "calculs-server.js",
+      "auto-settlement.js",
+      "matches-sync.js",
+      "matches-sync-sportradar.js",
+      "mailer.js",
+      "maintenance.js",
+      "scores-sync.js",
+      "odds-generator.js",
+      "odds-generator-v2.js",
+      "football-data.js",
+      "routes-*.js",
+      "js/**/*",
+      "css/**/*",
+      "pages/**/*",
+      "assets/**/*",
+      "*.html",
+      ".env"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarifs — Me2/3Legend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/landing.css">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="landing-nav">
+    <a href="/" class="nav-brand"><span class="nav-logo">2</span><span>Me<strong>2/3</strong>Legend</span></a>
+    <div class="nav-links">
+      <a href="/#features">Fonctionnalités</a>
+      <a href="/pages/tarifs">Tarifs</a>
+      <a href="/pages/blog">Blog</a>
+      <a href="/pages/contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="btn ghost sm">Se connecter</a>
+      <a href="/login?tab=register" class="btn sm">Commencer →</a>
+    </div>
+  </nav>
+
+  <!-- SECTION TARIFS -->
+  <section class="section" style="padding-top:60px;">
+    <div class="section-inner">
+      <h1 class="section-title">Choisissez votre formule</h1>
+      <p class="section-subtitle">Commencez gratuitement, évoluez à votre rythme.</p>
+      
+      <!-- C'est ici que le JS va injecter les cartes -->
+      <div class="pricing-grid" id="pricing-grid">
+        <div class="loading-block"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-cols">
+      <div class="footer-col"><div class="footer-brand"><span class="nav-logo">2</span><span>Me<strong>2/3</strong>Legend</span></div><p>Plateforme professionnelle de paris sportifs.</p></div>
+      <div class="footer-col"><h5>Produit</h5><a href="/#features">Fonctionnalités</a><a href="/pages/tarifs">Tarifs</a></div>
+      <div class="footer-col"><h5>Entreprise</h5><a href="/pages/contact">Contact</a><a href="/pages/blog">Blog</a></div>
+    </div>
+    <div class="footer-bottom"><div>© 2026 Me2/3Legend</div></div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script>
+    const fmt = (v) => Number(v || 0).toLocaleString('fr-FR', { minimumFractionDigits: 0 });
+    const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    async function loadPricing() {
+      const el = document.getElementById('pricing-grid');
+      if (!el) return;
+      
+      try {
+        const r = await fetch('/api/public/plans');
+        if (!r.ok) throw new Error('Erreur API');
+        const plans = await r.json();
+
+        if (!plans || plans.length === 0) {
+          el.innerHTML = '<div class="empty" style="grid-column:1/-1;">Aucune formule configurée.</div>';
+          return;
+        }
+
+        el.innerHTML = plans.map(p => {
+          // ⭐ Utilisation des clés envoyées par l'API : name, price_monthly, features
+          const color = p.couleur === 'violet' ? '#7c3aed' 
+                      : p.couleur === 'or'     ? '#f59e0b' 
+                      : p.couleur === 'cyan'   ? '#22d3ee' 
+                      : '#94a3b8';
+          
+          const popular = p.popular ? 'popular' : '';
+          
+          const price = Number(p.price_monthly) === 0
+            ? '<span class="price-free">Gratuit</span>'
+            : `<span class="price-num">${fmt(p.price_monthly)}</span><span class="price-cur">XAF/mois</span>`;
+
+          let features = [];
+          try {
+            features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features;
+          } catch(e) { features = []; }
+
+          return `
+            <div class="pricing-card ${popular}" style="--accent:${color};">
+              ${p.popular ? '<div class="popular-badge">⭐ POPULAIRE</div>' : ''}
+              <div class="pricing-name" style="color:${color}">${esc(p.name)}</div>
+              <div class="pricing-price">${price}</div>
+              <div class="pricing-desc">${esc(p.description || '')}</div>
+              <ul class="pricing-features">
+                ${(features || []).map(f => `<li>✓ ${esc(f)}</li>`).join('')}
+              </ul>
+              <a href="/login?tab=register&plan=${p.code}" class="btn btn-plan ${p.popular ? '' : 'ghost'}">
+                ${Number(p.price_monthly) === 0 ? 'Commencer gratuitement' : 'Choisir ' + esc(p.name)}
+              </a>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error('Erreur chargement tarifs:', e);
+        el.innerHTML = '<div class="empty" style="grid-column:1/-1;color:var(--rouge);">Erreur de chargement des tarifs.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadPricing);
+  </script>
+</body>
+</html>

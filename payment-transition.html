@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirection sécurisée — Me2/3Legend</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px; background: var(--bg-0);
+    }
+    .transition-card {
+      max-width: 440px; width: 100%;
+      padding: 40px 32px; text-align: center;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      border-radius: var(--radius-lg);
+    }
+    .transition-card .logo { font-size: 2.5rem; margin-bottom: 16px; }
+    .transition-card h1 {
+      font-size: 1.2rem; font-weight: 700;
+      margin-bottom: 10px; color: var(--txt);
+    }
+    .transition-card p {
+      font-size: .88rem; color: var(--txt-dim);
+      line-height: 1.6; margin-bottom: 24px;
+    }
+    .transition-card .spinner {
+      width: 40px; height: 40px; margin: 0 auto 20px;
+      border: 3px solid rgba(124,58,237,.2);
+      border-top-color: var(--violet);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .transition-card .warning {
+      font-size: .78rem; color: var(--orange);
+      padding: 12px; margin-top: 20px;
+      background: rgba(245,158,11,.08);
+      border-radius: 8px;
+      border-left: 3px solid var(--orange);
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="transition-card glass">
+    <div class="logo">🔐</div>
+    <div class="spinner"></div>
+    <h1>Redirection vers le paiement sécurisé</h1>
+    <p>
+      Vous allez être redirigé vers la plateforme de paiement <strong>CinetPay</strong>.
+      <br><br>
+      Ne fermez pas cette page. Vous serez ramené automatiquement vers Me2/3Legend après le paiement.
+    </p>
+    <div class="warning">
+      ⚠️ Ne relancez pas de paiement si vous avez un doute. Vérifiez d'abord votre historique de transactions.
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentUrl = sessionStorage.getItem('payment-redirect-url');
+      const txid = sessionStorage.getItem('payment-transaction-id');
+
+      if (!paymentUrl) {
+        window.location.href = '/app';
+        return;
+      }
+
+      setTimeout(() => {
+        sessionStorage.removeItem('payment-redirect-url');
+        /* On garde payment-transaction-id pour la page de retour */
+        if (txid) sessionStorage.setItem('last-transaction-id', txid);
+        window.location.href = paymentUrl;
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

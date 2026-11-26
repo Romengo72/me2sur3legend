@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Résultat du paiement — Me2/3Legend</title>
+  <link rel="stylesheet" href="/css/base.css">
+</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;">
+  <div class="glass" style="max-width:480px;width:100%;padding:40px 32px;text-align:center;">
+    <div id="result-icon" style="font-size:3rem;margin-bottom:16px;">⏳</div>
+    <h1 id="result-title" style="font-size:1.3rem;font-weight:800;margin-bottom:10px;">Vérification du paiement…</h1>
+    <p id="result-message" style="color:var(--txt-dim);font-size:.9rem;line-height:1.6;margin-bottom:24px;">
+      Nous vérifions le statut de votre transaction auprès de CinetPay.
+    </p>
+    <div id="result-actions" style="display:none;">
+      <a id="retry-link" href="/app" class="btn" style="margin-right:8px;">🔄 Réessayer</a>
+      <a href="/app" class="btn ghost">Retour au tableau de bord</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(location.search);
+      const transId = params.get('transaction_id') || params.get('cpm_trans_id') || sessionStorage.getItem('last-transaction-id');
+      const status = params.get('status') || params.get('cpm_result');
+
+      // Si CinetPay renvoie déjà un statut explicite dans l'URL
+      if (status === '00' || status === 'SUCCESS' || status === 'ACCEPTED') {
+        showSuccess();
+        return;
+      }
+      if (status === '600' || status === 'FAILED' || status === 'REFUSED') {
+        showFailure();
+        return;
+      }
+
+      // Sinon, vérifier via l'API
+      if (transId) {
+        try {
+          const r = await fetch(`/api/payment/check?transaction_id=${encodeURIComponent(transId)}`, { credentials: 'include' });
+          const data = await r.json();
+          if (data.status === 'SUCCESS' || data.status === 'ACCEPTED' || data.code === '00') {
+            showSuccess();
+          } else if (data.status === 'PENDING') {
+            showPending();
+          } else {
+            showFailure();
+          }
+        } catch (e) {
+          showFailure();
+        }
+      } else {
+        showFailure();
+      }
+    });
+
+    function showSuccess() {
+      document.getElementById('result-icon').textContent = '✅';
+      document.getElementById('result-title').textContent = 'Paiement réussi';
+      document.getElementById('result-message').textContent = 'Votre transaction a été acceptée. Votre solde sera mis à jour dans quelques instants.';
+      document.getElementById('result-actions').style.display = 'block';
+      document.getElementById('retry-link').style.display = 'none';
+    }
+
+    function showFailure() {
+      document.getElementById('result-icon').textContent = '❌';
+      document.getElementById('result-title').textContent = 'Paiement échoué';
+      document.getElementById('result-message').textContent = 'La transaction n\'a pas abouti. Vous pouvez réessayer ou contacter le support.';
+      document.getElementById('result-actions').style.display = 'block';
+      document.getElementById('retry-link').href = '/app';  // ← retour au dashboard, pas à l'inscription
+      document.getElementById('retry-link').textContent = '🔄 Réessayer le dépôt';
+    }
+
+    function showPending() {
+      document.getElementById('result-icon').textContent = '⏳';
+      document.getElementById('result-title').textContent = 'Paiement en attente';
+      document.getElementById('result-message').textContent = 'Votre paiement est en cours de traitement. Vérifiez votre historique dans quelques minutes.';
+      document.getElementById('result-actions').style.display = 'block';
+      document.getElementById('retry-link').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

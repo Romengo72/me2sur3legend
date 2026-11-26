@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Me2/3Legend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .auth-card {
+      width: 100%; max-width: 460px;
+      padding: 42px 38px;
+      position: relative;
+    }
+
+    /* ⭐ Bouton Retour à l'accueil */
+    .back-home {
+      position: absolute;
+      top: 18px; left: 20px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid var(--glass-brd);
+      color: var(--txt-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-home:hover {
+      background: rgba(124, 58, 237, 0.25);
+      border-color: rgba(124, 58, 237, 0.5);
+      color: var(--txt);
+      transform: translateX(-2px);
+    }
+
+    .auth-brand { text-align: center; margin-bottom: 34px; }
+    .auth-brand .logo-pulse { width: 60px; height: 60px; margin: 0 auto 18px; }
+    .auth-brand h1 {
+      font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+    .auth-brand h1 strong {
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .auth-brand p { color: var(--txt-dim); font-size: .9rem; }
+
+    .auth-form { display: flex; flex-direction: column; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: .8rem; font-weight: 600; color: var(--txt-dim);
+      text-transform: uppercase; letter-spacing: .06em;
+    }
+    .auth-error {
+      color: var(--rouge); font-size: .88rem; min-height: 18px;
+      text-align: center; font-weight: 500;
+    }
+    .auth-switch {
+      text-align: center; margin-top: 22px;
+      font-size: .88rem; color: var(--txt-dim);
+    }
+    .auth-switch a {
+      color: var(--cyan); text-decoration: none; font-weight: 600;
+      cursor: pointer;
+    }
+    .auth-switch a:hover { text-decoration: underline; }
+
+    .tabs {
+      display: flex; margin-bottom: 26px;
+      background: rgba(10,10,25,.6);
+      border: 1px solid var(--glass-brd);
+      border-radius: 999px; padding: 4px;
+    }
+    .tabs button {
+      flex: 1; padding: .7rem; background: transparent; border: none;
+      color: var(--txt-dim); font-weight: 600; font-size: .9rem;
+      cursor: pointer; border-radius: 999px; transition: all var(--tr);
+      font-family: var(--font);
+    }
+    .tabs button.active {
+      background: var(--grad-main); color: #fff;
+      box-shadow: 0 0 20px rgba(124,58,237,.5);
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="auth-card glass">
+
+    <!-- ⭐ Bouton Retour à l'accueil -->
+    <a href="/" class="back-home" title="Retour à l'accueil">
+      ← Retour à l'accueil
+    </a>
+
+    <div class="auth-brand">
+      <div class="logo-pulse"></div>
+      <h1>Me<strong>2/3</strong>Legend</h1>
+      <p>Plateforme de paris sportifs</p>
+    </div>
+
+    <div class="tabs">
+      <button data-tab="login" class="active">Connexion</button>
+      <button data-tab="register">Inscription</button>
+    </div>
+
+    <!-- Formulaire de connexion -->
+    <form id="form-login" class="auth-form">
+      <div class="field">
+        <label>Email</label>
+        <input class="input" type="email" id="login-email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input class="input" type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn" type="submit" id="login-submit">Se connecter</button>
+      <div style="text-align:center;margin-top:14px;">
+        <a href="#" id="forgot-link" style="color:var(--cyan);font-size:.85rem;text-decoration:none;">
+          Mot de passe oublié ?
+        </a>
+      </div>
+    </form>
+
+    <!-- Formulaire d'inscription -->
+    <form id="form-register" class="auth-form hidden">
+      <div class="field">
+        <label>Nom complet</label>
+        <input class="input" type="text" id="reg-name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="input" type="email" id="reg-email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Mot de passe (6 car. min.)</label>
+        <input class="input" type="password" id="reg-password" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Code parrain (optionnel)</label>
+        <input class="input" type="text" id="reg-referral" placeholder="Ex: A1B2C3D4" autocomplete="off" style="text-transform:uppercase;">
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn" type="submit" id="reg-submit">Créer mon compte</button>
+      <p style="text-align:center;font-size:.78rem;color:var(--txt-dim);margin-top:6px;">
+        🎁 Bonus de bienvenue : <strong style="color:var(--cyan);">+500 XAF</strong>
+      </p>
+    </form>
+  </div>
+
+    <script src="/js/config.js"></script>
+<script>
+  // ⭐ Helper CSRF global (utilisable dans toute la page)
+  window.getCsrfToken = function() {
+    const match = document.cookie.match(/(^|;\s*)csrf_token=([^;]+)/);
+    return match ? decodeURIComponent(match[2]) : '';
+  };
+
+  window.fetchWithCsrf = async function(url, opts = {}) {
+    const method = (opts.method || 'GET').toUpperCase();
+    const headers = { ...(opts.headers || {}) };
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+      headers['X-CSRF-Token'] = window.getCsrfToken();
+    }
+    return fetch(url, {
+      ...opts,
+      headers,
+      credentials: opts.credentials || 'include'
+    });
+  };
+
+  /* ONGLETS */
+  const tabs = document.querySelectorAll('.tabs button');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+
+  function switchTab(name) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    formLogin.classList.toggle('hidden', name !== 'login');
+    formRegister.classList.toggle('hidden', name !== 'register');
+  }
+  tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+  const params = new URLSearchParams(location.search);
+  const selectedPlan = params.get('plan');
+
+  if (params.get('tab') === 'register' || selectedPlan) switchTab('register');
+  const refCode = params.get('ref');
+  if (refCode) {
+    switchTab('register');
+    document.getElementById('reg-referral').value = refCode.toUpperCase();
+  }
+
+  if (selectedPlan) {
+    const planNames = { 'premium': 'Premium', 'vip': 'VIP', 'prestige': 'Prestige' };
+    const name = planNames[selectedPlan] || selectedPlan;
+    const infoBox = document.createElement('div');
+    infoBox.style.cssText = 'background:rgba(124,58,237,.15);border-left:4px solid var(--violet);padding:12px;border-radius:8px;margin-bottom:20px;font-size:0.85rem;color:var(--txt);';
+    infoBox.innerHTML = `✨ Vous avez choisi la formule <strong>${name}</strong>.<br>Créez votre compte pour être redirigé immédiatement vers le paiement sécurisé.`;
+    formRegister.insertBefore(infoBox, formRegister.firstChild);
+  }
+
+  /* CONNEXION */
+  formLogin.addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-submit');
+    errEl.textContent = '';
+    btn.disabled = true; btn.textContent = 'Connexion…';
+    try {
+      const r = await fetchWithCsrf('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('login-email').value,
+          password: document.getElementById('login-password').value
+        })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Erreur');
+      window.location.href = '/app';
+    } catch (err) {
+      errEl.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Se connecter';
+    }
+  });
+
+  /* INSCRIPTION & PAIEMENT DIRECT */
+  formRegister.addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl = document.getElementById('reg-error');
+    const btn = document.getElementById('reg-submit');
+    errEl.textContent = '';
+
+    const payload = {
+      email: document.getElementById('reg-email').value,
+      password: document.getElementById('reg-password').value,
+      fullName: document.getElementById('reg-name').value,
+      referralCode: document.getElementById('reg-referral').value.trim().toUpperCase() || undefined
+    };
+
+    btn.disabled = true;
+    btn.textContent = selectedPlan ? 'Redirection vers le paiement…' : 'Création…';
+
+    try {
+      if (selectedPlan) {
+        const r = await fetchWithCsrf('/api/payment/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: payload.email,
+            password: payload.password,
+            fullName: payload.fullName,
+            plan_code: selectedPlan
+          })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Erreur de paiement');
+
+        if (data.payment_url) window.location.href = data.payment_url;
+        else throw new Error('Lien de paiement introuvable');
+      } else {
+        const r = await fetchWithCsrf('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Erreur');
+        window.location.href = '/app';
+      }
+    } catch (err) {
+      errEl.textContent = err.message;
+      btn.disabled = false; btn.textContent = 'Créer mon compte';
+    }
+  });
+
+  /* MOT DE PASSE OUBLIÉ */
+  document.getElementById('forgot-link').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = prompt('Entrez votre email pour recevoir un lien de réinitialisation :');
+    if (!email) return;
+    try {
+      const r = await fetchWithCsrf('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Erreur');
+      alert(data.message);
+    } catch (err) { alert('❌ ' + err.message); }
+  });
+
+  /* RESET TOKEN */
+  const resetToken = params.get('reset_token');
+  if (resetToken) {
+    setTimeout(() => {
+      const pwd = prompt('🔑 Nouveau mot de passe (6 caractères min) :');
+      if (!pwd) return;
+      if (pwd.length < 6) return alert('Le mot de passe doit faire au moins 6 caractères.');
+      (async () => {
+        try {
+          const r = await fetchWithCsrf('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: resetToken, newPassword: pwd })
+          });
+          const data = await r.json();
+          if (!r.ok) throw new Error(data.error || 'Erreur');
+          alert('✅ ' + data.message);
+          location.href = '/login';
+        } catch (err) { alert('❌ ' + err.message); }
+      })();
+    }, 300);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Me2/3Legend — Paris sportifs intelligents | 2 gagnants sur 3</title>
+  <meta name="description" content="Plateforme professionnelle de paris sportifs : calcul automatique des mises, 3 stratégies de répartition, IA prédictive, multi-devises.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%237c3aed'/%3E%3Cstop offset='100%25' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23g)'/%3E%3Ctext x='50' y='66' font-size='52' font-weight='900' text-anchor='middle' fill='white' font-family='Inter,sans-serif'%3E2%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/landing.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="landing-nav">
+    <a href="/" class="nav-brand">
+      <span class="nav-logo">Me</span>
+      <span><strong>2/3</strong>Legend</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features" data-i18n="landing.nav.features">Fonctionnalités</a>
+      <a href="#how" data-i18n="landing.nav.how">Comment ça marche</a>
+      <a href="/pages/tarifs" data-i18n="landing.nav.pricing">Tarifs</a>
+      <a href="#leaderboard" data-i18n="landing.nav.leaderboard">Classement</a>
+      <a href="#news" data-i18n="landing.nav.news">Actualités</a>
+      <a href="#faq" data-i18n="landing.nav.faq">FAQ</a>
+    </div>
+    <div class="nav-actions" style="display:flex; align-items:center; gap:10px;">
+      <div id="lang-selector"></div>
+      <a href="/login" class="btn sm" data-i18n="landing.nav.login">Se connecter</a>
+      <a href="/login?tab=register" class="btn sm" data-i18n="landing.nav.start">Commencer →</a>
+    </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu">☰</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="hero-badge" data-i18n="landing.hero.badge">✨ Nouveau : Prédictions IA</div>
+      <h1>
+        <span data-i18n="landing.hero.title1">Paris sportifs</span><br>
+        <span class="hero-gradient" data-i18n="landing.hero.title2">intelligents</span>
+      </h1>
+      <p class="hero-subtitle" data-i18n="landing.hero.sub">
+        Calculez vos mises optimales sur 3 cotes (W1, X, W2) avec <strong>2 gagnants sur 3 garantis</strong> dès que la plus petite cote atteint 1.60. Simple. Précis. Gagnant.
+      </p>
+      <div class="hero-cta">
+        <a href="/login?tab=register" class="btn btn-lg" data-i18n="landing.hero.cta1">🚀 Commencer gratuitement</a>
+        <a href="#how" class="btn btn-lg" data-i18n="landing.hero.cta2">▶️ Voir la démo</a>
+      </div>
+      <div class="hero-stats" id="hero-stats">
+        <div class="hero-stat"><div class="num" id="stat-users">—</div><div class="lbl">Utilisateurs</div></div>
+        <div class="hero-stat"><div class="num" id="stat-saisies">—</div><div class="lbl">Matchs analysés</div></div>
+        <div class="hero-stat"><div class="num" id="stat-volume">—</div><div class="lbl">Volume XAF</div></div>
+        <div class="hero-stat"><div class="num">2/3</div><div class="lbl">Garantis</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLOT PUB HAUT -->
+  <div class="ad-slot" id="landingAdTop"></div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-inner">
+      <h2 class="section-title" data-i18n="landing.features.title">Pourquoi Me2/3Legend ?</h2>
+      <p class="section-subtitle" data-i18n="landing.features.sub">Une approche mathématique rigoureuse, une interface moderne, des résultats mesurables.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>2 gagnants sur 3</h3>
+          <p>Notre formule garantit que 2 colonnes sur 3 génèrent un bénéfice net dès que la plus petite cote est ≥ 1.60.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>IA prédictive</h3>
+          <p>Prédictions par OpenAI, DeepSeek ou Claude. Score probable et niveau de confiance affichés en temps réel.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>3 stratégies T1/T2/T3</h3>
+          <p>Chaque tableau couvre une paire différente (min+mid, min+max, mid+max). Vous choisissez selon votre intuition.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💱</div>
+          <h3>14 devises</h3>
+          <p>XAF, EUR, USD, GBP, CHF, CAD, JPY, AUD, CNY, BRL, MAD, DZD, TND, RUB. Vos paris dans votre monnaie.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Sécurité bancaire</h3>
+          <p>Retraits protégés par code OTP email (2FA), sessions httpOnly, bcrypt, journal de sécurité complet.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📈</div>
+          <h3>Statistiques avancées</h3>
+          <p>Historique filtrable, courbes de gains, taux de réussite IA, export PDF et CSV.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section section-alt" id="how">
+    <div class="section-inner">
+      <h2 class="section-title" data-i18n="landing.how.title">Comment ça marche ?</h2>
+      <p class="section-subtitle" data-i18n="landing.how.sub">4 étapes simples pour transformer votre approche des paris.</p>
+      <div class="steps-grid">
+        <div class="step-card"><div class="step-num">1</div><h3>Inscrivez-vous</h3><p>Créez votre compte en 30 secondes et recevez <strong>500 XAF</strong> de bonus de bienvenue.</p></div>
+        <div class="step-card"><div class="step-num">2</div><h3>Saisissez 3 cotes</h3><p>Entrez les cotes W1, X et W2 d'un match. Notre moteur calcule instantanément M1, M2, M3.</p></div>
+        <div class="step-card"><div class="step-num">3</div><h3>Choisissez un tableau</h3><p>T1, T2 ou T3 — chacun privilégie un scénario. Le gain de 2 colonnes est garanti.</p></div>
+        <div class="step-card"><div class="step-num">4</div><h3>Encaissez</h3><p>L'admin valide le résultat. Votre gain est crédité automatiquement sur votre solde.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLOT PUB MILIEU -->
+  <div class="ad-slot" id="landingAdMid"></div>
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="section-inner">
+      <h2 class="section-title" data-i18n="landing.pricing.title">Choisissez votre formule</h2>
+      <p class="section-subtitle" data-i18n="landing.pricing.sub">Commencez gratuitement, évoluez à votre rythme.</p>
+      <div class="pricing-grid" id="pricing-grid">
+        <div class="loading-block" style="text-align:center; width:100%;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section section-alt" id="testimonials">
+    <div class="section-inner">
+      <h2 class="section-title">Ils nous font confiance</h2>
+      <p class="section-subtitle">Des milliers de parieurs à travers le monde.</p>
+      <div class="testimonials-grid" id="testimonials-grid">
+        <div class="loading-block" style="text-align:center; width:100%;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="section" id="leaderboard">
+    <div class="section-inner">
+      <h2 class="section-title">🏆 Top 10 utilisateurs</h2>
+      <p class="section-subtitle">Les meilleurs capitalistes de la plateforme (anonymisés).</p>
+      <div id="leaderboard-content" class="leaderboard-wrap">
+        <div class="loading-block" style="text-align:center;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTUALITÉS -->
+  <section class="section section-alt" id="news">
+    <div class="section-inner">
+      <h2 class="section-title">📰 Actualités</h2>
+      <p class="section-subtitle">Conseils, actualités sportives et nouveautés.</p>
+      <div class="news-grid" id="news-grid">
+        <div class="loading-block" style="text-align:center; width:100%;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="section-inner">
+      <h2 class="section-title">Questions fréquentes</h2>
+      <p class="section-subtitle">Tout ce que vous devez savoir avant de commencer.</p>
+      <div class="faq-list" id="faq-list">
+        <div class="loading-block" style="text-align:center;"><span class="spinner"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <div class="cta-final-inner">
+      <h2>Prêt à passer au niveau supérieur ?</h2>
+      <p>Rejoignez Me2/3Legend aujourd'hui et recevez <strong>500 XAF</strong> de bonus.</p>
+      <a href="/login?tab=register" class="btn btn-lg">🚀 Créer mon compte gratuit</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-brand"><span class="nav-logo">2</span><span>Me<strong>2/3</strong>Legend</span></div>
+        <p>Plateforme professionnelle d'aide à la décision pour paris sportifs avec IA et statistiques avancées.</p>
+        <div class="footer-social" style="margin-top:15px;display:flex;gap:10px;">
+          <a href="https://t.me/me2sur3legend" target="_blank" rel="noopener" title="Telegram" style="background:rgba(34,211,238,.15);padding:5px 10px;border-radius:8px;text-decoration:none;color:var(--cyan);">✈️ Telegram</a>
+          <a href="https://wa.me/237673228928" target="_blank" rel="noopener" title="WhatsApp" style="background:rgba(16,185,129,.15);padding:5px 10px;border-radius:8px;text-decoration:none;color:var(--vert);">💬 WhatsApp</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Produit</h5>
+        <a href="#features">Fonctionnalités</a>
+        <a href="/pages/tarifs">Tarifs</a>
+        <a href="#leaderboard">Classement</a>
+        <a href="/pages/blog">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Entreprise</h5>
+        <a href="/pages/contact">Contact</a>
+        <a href="/pages/promoteur">Annonceurs</a>
+        <a href="/pages/mentions-legales">Mentions légales</a>
+        <a href="/pages/confidentialite">Confidentialité</a>
+        <a href="/pages/cgu">CGU</a>
+      </div>
+      <div class="footer-col">
+        <h5>Support</h5>
+        <a href="#faq">FAQ</a>
+        <a href="/pages/signaler-bug">Signaler un bug</a>
+        <a href="https://wa.me/237673228928" target="_blank" rel="noopener">WhatsApp Business</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Me2/3Legend — Tous droits réservés</div>
+      <div class="footer-warning">⚠️ Jouer comporte des risques : endettement, isolement, dépendance.<br>Appelez le <strong>09 74 75 13 13</strong> (appel non surtaxé).</div>
+    </div>
+  </footer>
+
+  <script src="/js/i18n.js"></script>
+  <script src="/js/config.js"></script>
+  <script src="/js/landing.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.I18N) window.I18N.renderSelector('lang-selector');
+    });
+    document.addEventListener('lang:change', () => {
+      if (window.I18N) window.I18N.apply();
+    });
+  </script>
+</body>
+</html>

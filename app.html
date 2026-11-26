@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Me2/3Legend — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar glass">
+      <div class="brand">
+        <div class="logo-pulse">Me</div>
+        <span><strong>2/3</strong>Legend</span>
+      </div>
+
+      <nav id="main-nav">
+        <a data-view="saisie" class="active"><span class="nav-ico">⚡</span> <span data-i18n="nav.saisie">Saisie</span></a>
+        <a data-view="result-budget"><span class="nav-ico">📊</span> <span data-i18n="nav.results">Résultats</span></a>
+        <a data-view="history"><span class="nav-ico">📜</span> <span data-i18n="nav.history">Historique</span></a>
+        <a data-view="stat"><span class="nav-ico">📈</span> <span data-i18n="nav.stats">Statistiques</span></a>
+        <a data-view="suggestion"><span class="nav-ico">🔍</span> <span data-i18n="nav.suggestions">Suggestions</span></a>
+        <a data-view="leaderboard"><span class="nav-ico">🏆</span> <span data-i18n="nav.leaderboard">Classement</span></a>
+        <a data-view="subscription"><span class="nav-ico">💎</span> <span data-i18n="nav.subscription">Abonnement</span></a>
+        <a data-view="referral"><span class="nav-ico">🎁</span> <span data-i18n="nav.referral">Parrainage</span></a>
+        <a data-view="news"><span class="nav-ico">📰</span> <span data-i18n="nav.news">Actualités</span></a>
+        <a data-view="profil"><span class="nav-ico">👤</span> <span data-i18n="nav.profile">Mon profil</span></a>
+        <a data-view="admin" id="nav-admin" hidden><span class="nav-ico">🛡️</span> <span data-i18n="nav.admin">Admin</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn ghost sm" id="theme-toggle">🌗 <span data-i18n="btn.theme">Thème clair</span></button>
+        <button class="btn ghost sm" id="logout-btn">↩ <span data-i18n="btn.logout">Déconnexion</span></button>
+        <button class="btn ghost sm" id="btn-chat-ia" onclick="window.IAChat.toggle()">
+          💬 Chat IA
+        </button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar glass">
+        <div>
+          <div id="view-title" class="title">Saisie</div>
+          <div class="subtitle" id="view-subtitle">Calculez vos mises optimales</div>
+        </div>
+
+        <div class="top-right">
+          <!-- ⭐ LE SELECTEUR EST ICI -->
+          <div id="lang-selector"></div>
+
+          <div class="balance-pill" id="balance-pill">
+            <span class="label" id="balance-label" data-i18n="app.balance">Mon solde</span>
+            <span class="value">—</span>
+          </div>
+
+          <button class="btn ghost sm user-only" id="btn-deposit" onclick="Deposit.open()">
+            💰 <span data-i18n="app.deposit">Dépôt</span>
+          </button>
+          <button class="btn ghost sm user-only" id="btn-withdraw" onclick="Withdrawal.open()">
+            💸 <span data-i18n="app.withdraw">Retrait sécurisé</span>
+          </button>
+
+          <button class="btn ghost sm admin-only" id="btn-collect" onclick="AdminCollect.open()" style="display:none;">
+            💼 <span data-i18n="app.collect">Collecte des fonds</span>
+          </button>
+        </div>
+      </header>
+
+      <section id="views"></section>
+    </main>
+  </div>
+
+  <script src="/js/i18n.js?v=6.1.2"></script>
+  <script src="/js/config.js?v=6.1.2"></script>
+  <script src="/js/calculs.js?v=6.1.2"></script>
+  <script src="/js/api.js?v=6.1.2"></script>
+  <script src="/js/ui.js?v=6.1.2"></script>
+  <script src="/js/navigation.js?v=6.1.2"></script>
+  <script src="/js/saisie.js?v=6.1.2"></script>
+  <script src="/js/resultats.js?v=6.1.2"></script>
+  <script src="/js/historique.js?v=6.1.2"></script>
+  <script src="/js/ia.js?v=6.1.2"></script>
+  <script src="/js/ia-vip.js?v=6.1.2"></script>
+  <script src="/js/ia-pending.js?v=6.1.2"></script>
+  <script src="/js/ia-chat.js?v=6.1.2"></script>
+  <script src="/js/admin-finance.js?v=6.1.2"></script>
+  <script src="/js/admin-panel.js?v=6.1.2"></script>
+  <script src="/js/monetisation.js?v=6.1.2"></script>
+  <script src="/js/withdrawal.js?v=6.1.2"></script>
+  <script src="/js/deposit.js?v=6.1.2"></script>
+  <script src="/js/admin-collect.js?v=6.1.2"></script>
+  <script src="/js/profil.js?v=6.1.2"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.I18N) window.I18N.renderSelector('lang-selector');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rapport Détaillé — Me2/3Legend v6.0.2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070d; --glass: rgba(20, 20, 42, 0.55); --glass-brd: rgba(124, 58, 237, 0.25);
+      --txt: #e9e9ff; --txt-dim: #a0a0c0; --violet: #7c3aed; --cyan: #22d3ee;
+      --vert: #10b981; --orange: #f59e0b; --rouge: #ef4444;
+      --grad-main: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #22d3ee 100%);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif; background: var(--bg); color: var(--txt);
+      line-height: 1.6; padding: 40px 20px;
+      background-image: radial-gradient(circle at 20% 20%, rgba(16,185,129,.1), transparent 40%), radial-gradient(circle at 80% 80%, rgba(124,58,237,.15), transparent 40%);
+    }
+    .doc-container {
+      max-width: 900px; margin: 0 auto; background: var(--glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-brd); border-radius: 20px; padding: 50px; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+    }
+    h1 { font-size: 2rem; font-weight: 900; text-align: center; color: #fff; margin-bottom: 8px; }
+    h1 span { background: var(--grad-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { text-align: center; color: var(--txt-dim); font-size: 0.95rem; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-brd); }
+    h2 { font-size: 1.3rem; color: var(--vert); margin-top: 40px; margin-bottom: 16px; padding-left: 12px; border-left: 4px solid var(--vert); }
+    h3 { font-size: 1.05rem; color: #fff; margin-top: 24px; margin-bottom: 10px; }
+    p { margin-bottom: 14px; color: #cbd5e1; font-size: 0.95rem; text-align: justify; }
+    ul { margin-bottom: 16px; padding-left: 24px; color: #cbd5e1; font-size: 0.95rem; }
+    li { margin-bottom: 8px; }
+    code { background: rgba(34,211,238,.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--cyan); }
+    pre { background: rgba(10,10,25,.8); border: 1px solid var(--glass-brd); padding: 16px; border-radius: 10px; overflow-x: auto; font-family: monospace; font-size: 0.85rem; color: #e2e8f0; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.9rem; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid rgba(124,58,237,.15); }
+    th { background: rgba(16,185,129,.15); color: #6ee7b7; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
+    tr:hover td { background: rgba(16,185,129,.05); }
+    .status-ok { color: var(--vert); font-weight: 700; }
+    .status-fix { color: var(--cyan); font-weight: 700; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .kpi-card { background: rgba(10,10,25,.6); border: 1px solid var(--glass-brd); border-radius: 12px; padding: 20px; text-align: center; }
+    .kpi-value { font-size: 2rem; font-weight: 900; color: var(--cyan); margin-bottom: 4px; }
+    .kpi-label { font-size: 0.8rem; color: var(--txt-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--glass-brd); text-align: center; font-size: 0.8rem; color: var(--txt-dim); }
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .doc-container { box-shadow: none; border: none; background: transparent; padding: 20px; }
+      h1, h1 span { -webkit-text-fill-color: #000; color: #000; }
+      h2 { color: #10b981; border-left-color: #10b981; }
+      h3 { color: #000; }
+      p, li, td { color: #333; }
+      th { background: #f0fdf4; color: #000; }
+      .kpi-card { border-color: #ccc; background: #f9fafb; }
+      .kpi-value { color: #000; }
+      .footer { color: #666; }
+    }
+  </style>
+</head>
+<body>
+  <div class="doc-container">
+    <h1>Rapport d'Activité <span>v6.0.2</span></h1>
+    <div class="subtitle">Synthèse des correctifs, de la refonte et de l'état de la plateforme Me2/3Legend</div>
+
+    <h2>1. Résumé Exécutif</h2>
+    <p>La plateforme a subi une refonte majeure pour passer de la version de test à la version de production (étiquetée <strong>v6.0.2</strong>). L'objectif principal était d'éradiquer les failles de sécurité, de corriger les bugs d'affichage liés à l'encodage, et d'intégrer les nouvelles règles métier.</p>
+    <p><strong>Statut global :</strong> <span class="status-ok">Prêt pour la production (après saisie des clés API définitives).</span></p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-value">100%</div><div class="kpi-label">Bugs critiques résolus</div></div>
+      <div class="kpi-card"><div class="kpi-value">6</div><div class="kpi-label">Fichiers serveur majeurs corrigés</div></div>
+      <div class="kpi-card"><div class="kpi-value">4</div><div class="kpi-label">Langues intégrées</div></div>
+    </div>
+
+    <h2>2. Registre des Correctifs Appliqués</h2>
+    <table>
+      <thead><tr><th>Domaine</th><th>Problème Rencontré</th><th>Solution Appliquée</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Encodage</strong></td><td>Affichage de "L,gendaire" au lieu de "Légendaire". Erreurs de syntaxe fatales dans <code>routes-payment.js</code>.</td><td class="status-ok">Réécriture ASCII-stricte. Nettoyage de la base via SQL. Drapeaux multilingues remplacés par des images CDN.</td></tr>
+        <tr><td><strong>Sécurité Paiement</strong></td><td>Risque de dépôt sans paiement réel sur d'anciens endpoints.</td><td class="status-ok">Neutralisation de <code>routes-deposit.js</code>. Seul le flux CinetPay (via <code>/payment/initialize</code>) est autorisé.</td></tr>
+        <tr><td><strong>Faille de Session</strong></td><td>Une route publique permettait de créer une session admin via un simple <code>txid</code>.</td><td class="status-ok">Suppression de la création de session dans <code>/payment/status</code>. Sécurisation stricte.</td></tr>
+        <tr><td><strong>Marges Financières</strong></td><td>Aucune traçabilité des marges bookmaker. Cotes calculées au hasard.</td><td class="status-ok">Implémentation des marges de 6% sur mises et gains (table <code>margin_collections</code>). Application des marges sur les cotes (<code>ajusterCotesAvecMarge</code>).</td></tr>
+        <tr><td><strong>Parrainage</strong></td><td>Inscriptions libres (risque de faux comptes).</td><td class="status-ok">Parrainage rendu obligatoire. Code spécial <code>SYSTEM0000</code> pour les invitations officielles.</td></tr>
+        <tr><td><strong>IA</strong></td><td>Aucun garde-fou sur les gains successifs (risque de vider la banque).</td><td class="status-ok">Ajout d'une table <code>ia_suspensions</code>. Blocage automatique des mises (50k/100k) avec fenêtre glissante de 7 jours.</td></tr>
+        <tr><td><strong>Permissions</strong></td><td>Gestion des droits uniquement utilisateur par utilisateur (lourd).</td><td class="status-ok">Nouvelles tables <code>permission_groups</code> et <code>user_permission_overrides</code>. L'admin peut modifier les droits par catégorie.</td></tr>
+        <tr><td><strong>Frontend</strong></td><td>Saisie modifiée par le JS (les cotes affichées n'étaient pas les vraies).</td><td class="status-ok">Correction de <code>saisie.js</code> : la saisie est fidèle. La marge silencieuse est appliquée exclusivement côté serveur.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. État de la Base de Données</h2>
+    <p>Toutes les tables ont été migrées avec succès.</p>
+    <ul>
+      <li>Table <code>plans</code> : <code>legendaire</code> (25 000 XAF) est désormais correctement enregistré avec ses accents.</li>
+      <li>Table <code>permission_groups</code> : Opérationnelle. 13 permissions granulaires par défaut.</li>
+      <li>Table <code>constantes</code> : Ajout du seuil <code>PAYMENT_THRESHOLD</code> (25 000 000 XAF) et des seuils <code>IA_WIN_THRESHOLD</code>.</li>
+      <li>Table <code>transactions</code> : Prête à filtrer le type <code>margin</code> pour ne pas afficher les marges aux utilisateurs.</li>
+    </ul>
+
+    <h2>4. Problèmes Connus (Non Bloquants)</h2>
+    <table>
+      <thead><tr><th>Problème</th><th>Cause</th><th>Recommandation</th></tr></thead>
+      <tbody>
+        <tr><td>Erreurs <code>HTTP 404</code> dans les logs serveur (Scores-Sync).</td><td>The Odds API ne reconnaît pas les anciens <code>sport_keys</code> (ex: 'soccer') enregistrés en base.</td><td>À nettoyer dans un futur sprint (UPDATE SQL des sports). Sportradar prend le relais en attendant.</td></tr>
+        <tr><td>Faux positifs "cp1252 detecte" lors du script PowerShell.</td><td>Le script détecte les octets des accents UTF-8 valides.</td><td>Aucune action requise. Les fichiers sont sains. Utiliser VS Code en UTF-8.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. Conclusion</h2>
+    <p>Le travail de refonte a permis d'assainir complètement le code. La séparation entre l'affichage client (Frontend) et la logique de prélèvement (Backend) garantit désormais l'intégrité financière de Me2/3Legend.</p>
+    <p>La plateforme est techniquement prête à recevoir ses premiers utilisateurs. Les prochaines étapes consistent à :</p>
+    <ul>
+      <li>Passer CinetPay en mode <code>production</code>.</li>
+      <li>Configurer le SMTP définitif pour les OTP de retrait.</li>
+      <li>Basculer l'URL de l'application (APP_URL) sur le nom de domaine réel avec SSL (HTTPS).</li>
+    </ul>
+
+    <div class="footer">Rapport généré automatiquement pour Me2/3Legend.<br>Direction Technique — Novembre 2026</div>
+  </div>
+</body>
+</html>

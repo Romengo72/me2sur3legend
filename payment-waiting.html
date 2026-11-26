@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement en cours — Me2/3Legend</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <style>
+    body {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .wait-card {
+      width: 100%; max-width: 480px;
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+    }
+    .wait-icon {
+      font-size: 4rem;
+      margin-bottom: 24px;
+      animation: pulse 2s infinite;
+    }
+    .wait-title {
+      font-size: 1.5rem; font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .wait-subtitle {
+      color: var(--txt-dim); font-size: .95rem;
+      line-height: 1.6; margin-bottom: 32px;
+    }
+    .wait-spinner {
+      width: 48px; height: 48px;
+      margin: 0 auto 24px;
+      border: 4px solid rgba(124,58,237,.2);
+      border-top-color: var(--violet);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .wait-status {
+      padding: 16px; border-radius: 12px;
+      background: rgba(124,58,237,.1);
+      color: var(--txt-dim); font-size: .88rem;
+      margin-bottom: 20px;
+    }
+    .wait-timer {
+      font-family: monospace;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    .wait-error {
+      background: rgba(239,68,68,.1);
+      border-left: 4px solid var(--rouge);
+      padding: 16px; border-radius: 12px;
+      color: var(--txt); font-size: .9rem;
+      margin-bottom: 20px;
+      text-align: left;
+      line-height: 1.6;
+    }
+    .wait-error strong { color: var(--rouge); }
+    .wait-error code {
+      background: rgba(34,211,238,.1);
+      color: var(--cyan);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: .85rem;
+    }
+    .wait-actions {
+      display: flex; gap: 10px;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wait-card glass">
+    <div class="wait-icon" id="wait-icon">⏳</div>
+    <div class="wait-title" id="wait-title">Vérification du paiement…</div>
+    <div class="wait-subtitle" id="wait-subtitle">
+      Veuillez patienter, votre paiement est en cours de confirmation.<br>
+      <span style="font-size:.82rem;opacity:.8;">Ne fermez pas cette page.</span>
+    </div>
+
+    <div class="wait-spinner" id="wait-spinner"></div>
+
+    <div class="wait-status" id="wait-status">
+      Statut : <span id="wait-state-text">En attente de confirmation…</span><br>
+      Temps écoulé : <span class="wait-timer" id="wait-timer">0s</span>
+    </div>
+
+    <div id="wait-error-box" class="wait-error hidden"></div>
+
+    <div class="wait-actions hidden" id="wait-actions">
+      <a href="/app" class="btn">🏠 Accéder à l'application</a>
+      <a href="/" class="btn ghost">← Accueil</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const params = new URLSearchParams(location.search);
+      const txid = params.get('txid') || sessionStorage.getItem('last-transaction-id');
+      const isError = params.get('error') === '1';
+
+      const $ = (id) => document.getElementById(id);
+      const startTime = Date.now();
+      let pollCount = 0;
+      const POLL_INTERVAL = 2000;       // 2s
+      const TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+      const DIRECT_CHECK_AFTER = 10;    // bascule sur check-direct après 10 polls
+
+      if (!txid) {
+        showError(
+          'Aucune transaction à vérifier.<br><br>' +
+          'Retournez au tableau de bord et relancez votre dépôt.'
+        );
+        return;
+      }
+
+      if (isError) {
+        showError(
+          'Le paiement a été annulé ou a échoué.<br><br>' +
+          'Aucun montant n\'a été débité. Vous pouvez réessayer un dépôt depuis votre tableau de bord.'
+        );
+        return;
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? '')
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      function showError(html) {
+        $('wait-icon').textContent = '❌';
+        $('wait-icon').style.animation = 'none';
+        $('wait-title').textContent = 'Paiement non finalisé';
+        $('wait-subtitle').style.display = 'none';
+        $('wait-spinner').style.display = 'none';
+        $('wait-status').style.display = 'none';
+
+        const box = $('wait-error-box');
+        box.innerHTML =
+          '<strong>⚠️ Paiement non abouti</strong><br><br>' +
+          html +
+          (txid ? `<br><br>Référence de transaction : <code>${escapeHtml(txid)}</code>` : '');
+        box.classList.remove('hidden');
+
+        $('wait-actions').classList.remove('hidden');
+        $('wait-actions').innerHTML = `
+          <a href="/app" class="btn">🔄 Réessayer un dépôt</a>
+          <a href="/app" class="btn ghost">🏠 Tableau de bord</a>
+        `;
+        sessionStorage.removeItem('last-transaction-id');
+      }
+
+      function showSuccess(montant) {
+        $('wait-icon').textContent = '✅';
+        $('wait-icon').style.animation = 'none';
+        $('wait-title').textContent = 'Paiement confirmé !';
+        $('wait-subtitle').innerHTML = montant
+          ? `Votre transaction de <strong>${Number(montant).toLocaleString('fr-FR')} XAF</strong> a été acceptée.<br><span style="font-size:.82rem;">Redirection…</span>`
+          : 'Votre compte est à jour.<br><span style="font-size:.82rem;">Redirection…</span>';
+        $('wait-spinner').style.display = 'none';
+        $('wait-status').style.display = 'none';
+        $('wait-actions').classList.remove('hidden');
+        $('wait-actions').innerHTML = `
+          <a href="/app" class="btn">🏠 Accéder à l'application</a>
+        `;
+        sessionStorage.removeItem('last-transaction-id');
+
+        setTimeout(() => { window.location.href = '/app'; }, 1800);
+      }
+
+      function updateTimer() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const m = Math.floor(elapsed / 60);
+        const s = elapsed % 60;
+        $('wait-timer').textContent = m > 0 ? `${m}m ${s}s` : `${s}s`;
+      }
+
+      const timerInterval = setInterval(updateTimer, 1000);
+
+      async function poll() {
+        pollCount++;
+
+        // Timeout après 5 minutes
+        if (Date.now() - startTime > TIMEOUT_MS) {
+          clearInterval(timerInterval);
+          showError(
+            'Le paiement n\'a pas été confirmé dans les 5 minutes.<br><br>' +
+            'Si votre compte a bien été débité, contactez le support à ' +
+            '<strong>support@me23legend.app</strong> en précisant votre numéro de transaction : ' +
+            '<code style="color:var(--cyan);">' + escapeHtml(txid) + '</code>'
+          );
+          return;
+        }
+
+        // Bascule sur check-direct après 10 polls
+        const useDirect = pollCount > DIRECT_CHECK_AFTER;
+        const endpoint = useDirect
+          ? `/api/payment/check-direct/${encodeURIComponent(txid)}`
+          : `/api/payment/status/${encodeURIComponent(txid)}`;
+
+        if (pollCount === DIRECT_CHECK_AFTER + 1) {
+          $('wait-state-text').textContent = 'Vérification directe auprès de CinetPay…';
+        }
+
+        try {
+          const r = await fetch(endpoint, {
+            credentials: 'include',
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!r.ok) {
+            setTimeout(poll, POLL_INTERVAL);
+            return;
+          }
+
+          const data = await r.json();
+
+          if (data.status === 'paid') {
+            clearInterval(timerInterval);
+            showSuccess(data.montant);
+            return;
+          }
+
+          if (data.status === 'failed') {
+            clearInterval(timerInterval);
+            showError(
+              'Le paiement a échoué. Raison : ' + escapeHtml(data.reason || 'inconnue') + '<br><br>' +
+              'Aucun montant n\'a été débité.'
+            );
+            return;
+          }
+
+          if (data.status === 'pending') {
+            if (!useDirect) {
+              $('wait-state-text').textContent =
+                `En attente de CinetPay… (${pollCount} vérif.)`;
+            } else if (data.source === 'cinetpay') {
+              $('wait-state-text').textContent =
+                `CinetPay : ${escapeHtml(data.cinetpay_status || 'en cours')} (${pollCount} vérif.)`;
+            } else if (data.source === 'cinetpay_error') {
+              $('wait-state-text').textContent =
+                `Vérification directe indisponible (HTTP ${data.http_status || '?'})`;
+            }
+          }
+
+          setTimeout(poll, POLL_INTERVAL);
+
+        } catch (e) {
+          setTimeout(poll, POLL_INTERVAL);
+        }
+      }
+
+      // Démarrage : première vérif immédiate
+      poll();
+    })();
+  </script>
+</body>
+</html>

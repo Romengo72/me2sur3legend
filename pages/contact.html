@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Me2/3Legend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/landing.css">
+  <style>
+    .contact-form-wrap {
+      max-width: 640px; margin: 0 auto;
+      padding: 36px 32px;
+      background: var(--glass);
+      border: 1px solid var(--glass-brd);
+      border-radius: var(--radius-lg);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-field {
+      display: flex; flex-direction: column; gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-field label {
+      font-size: .78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .06em;
+      color: var(--txt-dim);
+    }
+    .form-field input,
+    .form-field textarea,
+    .form-field select {
+      padding: 12px 16px;
+      background: rgba(10,10,25,.6);
+      border: 1px solid var(--glass-brd);
+      border-radius: var(--radius);
+      color: var(--txt);
+      font-family: inherit;
+      font-size: .95rem;
+    }
+    .form-field textarea { resize: vertical; min-height: 140px; }
+    .form-field input:focus,
+    .form-field textarea:focus,
+    .form-field select:focus {
+      outline: none;
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.25);
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="landing-nav">
+    <a href="/" class="nav-brand"><span class="nav-logo">2</span><span>Me<strong>2/3</strong>Legend</span></a>
+    <div class="nav-links">
+      <a href="/#features">Fonctionnalités</a>
+      <a href="/pages/tarifs">Tarifs</a>
+      <a href="/pages/blog">Blog</a>
+      <a href="/pages/contact">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="/login" class="btn ghost sm">Se connecter</a>
+      <a href="/login?tab=register" class="btn sm">Commencer →</a>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top:60px;">
+    <div class="section-inner">
+      <h1 class="section-title">📬 Contactez-nous</h1>
+      <p class="section-subtitle">Une question ? Un projet d'annonce ? Nous vous répondons sous 24h.</p>
+
+      <div class="contact-form-wrap">
+        <form id="contact-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Nom complet</label>
+              <input type="text" id="cf-name" required placeholder="Jean Dupont">
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <input type="email" id="cf-email" required placeholder="vous@exemple.com">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Type de demande</label>
+            <select id="cf-type">
+              <option value="general">Question générale</option>
+              <option value="support">Support technique</option>
+              <option value="promoter">Devenir annonceur</option>
+              <option value="partnership">Partenariat</option>
+              <option value="bug">Signaler un bug</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Sujet</label>
+            <input type="text" id="cf-subject" placeholder="Résumé de votre demande">
+          </div>
+          <div class="form-field">
+            <label>Message</label>
+            <textarea id="cf-message" required placeholder="Détaillez votre demande…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-lg" style="width:100%;justify-content:center;">
+            📩 Envoyer le message
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="footer-cols">
+      <div class="footer-col"><div class="footer-brand"><span class="nav-logo">2</span><span>Me<strong>2/3</strong>Legend</span></div><p>Plateforme professionnelle de paris sportifs.</p></div>
+      <div class="footer-col"><h5>Produit</h5><a href="/#features">Fonctionnalités</a><a href="/pages/tarifs">Tarifs</a></div>
+      <div class="footer-col"><h5>Entreprise</h5><a href="/pages/contact">Contact</a><a href="/pages/blog">Blog</a></div>
+      <div class="footer-col"><h5>Support</h5><a href="/#faq">FAQ</a></div>
+    </div>
+    <div class="footer-bottom"><div>© 2026 Me2/3Legend</div></div>
+  </footer>
+
+  <script src="/js/config.js"></script>
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const oldText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Envoi…';
+      try {
+        const r = await fetch('/api/public/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('cf-name').value,
+            email: document.getElementById('cf-email').value,
+            type: document.getElementById('cf-type').value,
+            subject: document.getElementById('cf-subject').value,
+            message: document.getElementById('cf-message').value
+          })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Erreur');
+        alert('✅ ' + data.message);
+        e.target.reset();
+      } catch (err) {
+        alert('❌ ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = oldText;
+      }
+    });
+  </script>
+</body>
+</html>

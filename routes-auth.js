@@ -218,8 +218,13 @@ router.post('/login', async (req, res) => {
       ok: true, email: rows[0].email, role: rows[0].role,
       category: rows[0].category || 'free', language: rows[0].language || 'fr'
     });
-  } catch (e) {
-    console.error('[LOGIN ERROR]', e.stack || e.message);
+    } catch (e) {
+    console.error('═══════════════════════════════════════════');
+    console.error('[LOGIN ERROR]', new Date().toISOString());
+    console.error('Email :', req.body?.email);
+    console.error('Message :', e.message);
+    console.error('Stack :', e.stack);
+    console.error('═══════════════════════════════════════════');
     res.status(500).json({ error: e.message });
   }
 });

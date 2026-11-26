@@ -219,6 +219,7 @@ router.post('/login', async (req, res) => {
       category: rows[0].category || 'free', language: rows[0].language || 'fr'
     });
   } catch (e) {
+    console.error('[LOGIN ERROR]', e.stack || e.message);
     res.status(500).json({ error: e.message });
   }
 });

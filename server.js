@@ -1,5 +1,5 @@
 // C:\Me\AppMoney\MeParisPortifs\server.js
-// v6.2.9 — Logging HTTP, arrêt propre, cron sécurisé, ordre middleware
+// v6.3.0 — Port ouvert AVANT initDb (compatibilité Render)
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
@@ -29,7 +29,7 @@ try {
 }
 
 const app = express();
-const APP_VERSION = process.env.APP_VERSION || '6.2.9';
+const APP_VERSION = process.env.APP_VERSION || '6.3.0';
 const PORT = Number(process.env.PORT || 3000);
 
 const SCORES_SYNC_INTERVAL = 30 * 60 * 1000;
@@ -49,7 +49,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-/* ⭐ v6.2.9 : logging HTTP basique (méthode, URL, statut, durée) */
+/* Logging HTTP basique */
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
@@ -60,13 +60,17 @@ app.use((req, res, next) => {
   next();
 });
 
-/* CSRF (après cookieParser, avant les routes) */
+/* CSRF */
 const { csrfProtection } = require('./utils');
 app.use(csrfProtection);
 
 /* ═══════════════════════════════════════════════════════════════════ */
-/* HEALTH & VERSION                                                  */
+/* HEALTH (indépendant de la DB — critique pour Render)              */
 /* ═══════════════════════════════════════════════════════════════════ */
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', version: APP_VERSION, uptime: process.uptime() });
+});
+
 app.get('/api/health', (_req, res) => res.json({ ok: true, version: APP_VERSION }));
 app.get('/api/version', (_req, res) => res.json({ version: APP_VERSION }));
 
@@ -213,6 +217,58 @@ app.use((err, req, res, _next) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════ */
+/* DÉMARRAGE — PORT OUVERT IMMÉDIATEMENT (compatibilité Render)      */
+/* ═══════════════════════════════════════════════════════════════════ */
+let server;
+
+// 1. Ouvrir le port TOUT DE SUITE
+server = app.listen(PORT, '0.0.0.0', () => {
+  logger.info('═══════════════════════════════════════════');
+  logger.info(`🚀 Me2/3Legend v${APP_VERSION}`);
+  logger.info(`📡 Port : ${PORT}`);
+  logger.info(`🎯 Sportradar : ${process.env.SPORTRADAR_API_KEY ? '✅' : '❌'}`);
+  logger.info(`🎯 OddsPapi   : ${process.env.ODDSPAPI_KEY ? '✅' : '❌'}`);
+  logger.info(`🎯 CinetPay   : ${process.env.CINETPAY_MODE || 'sandbox'}`);
+  logger.info('═══════════════════════════════════════════');
+});
+
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 120000;
+
+// 2. Initialiser la DB en arrière-plan (ne bloque pas l'écoute)
+initDb()
+  .then(() => {
+    logger.info('✔ Base de données initialisée.');
+
+    // 3. Démarrer les crons SEULEMENT si la DB est prête
+    if (process.env.DISABLE_CRONS !== '1') {
+      safeInterval(syncScoresAndValidate, SCORES_SYNC_INTERVAL, 'scores');
+      safeInterval(async () => {
+        try {
+          await syncUpcomingMatches();
+          await syncFromSportradar();
+        } catch (e) {
+          logger.error('[Cron matches]', e.message);
+        }
+      }, MATCHES_SYNC_INTERVAL, 'matches');
+      startAutoSettlementCron();
+      startMaintenanceCron();
+
+      // Premier cycle après 10s
+      setTimeout(() => {
+        syncScoresAndValidate().catch(e => logger.error('[Init scores]', e.message));
+        syncUpcomingMatches().catch(e => logger.error('[Init matches]', e.message));
+      }, 10000);
+    } else {
+      logger.info('[Cron] Désactivés (DISABLE_CRONS=1)');
+    }
+  })
+  .catch(e => {
+    logger.error('❌ Échec init DB (le serveur reste joignable) :', e.message);
+    // ⚠️ NE PAS process.exit(1) : Render verrait un service mort
+  });
+
+/* ═══════════════════════════════════════════════════════════════════ */
 /* CRON SÉCURISÉS                                                    */
 /* ═══════════════════════════════════════════════════════════════════ */
 function safeInterval(fn, ms, label) {
@@ -222,57 +278,9 @@ function safeInterval(fn, ms, label) {
   }, ms);
 }
 
-if (process.env.DISABLE_CRONS !== '1') {
-  safeInterval(syncScoresAndValidate, SCORES_SYNC_INTERVAL, 'scores');
-
-  safeInterval(async () => {
-    try {
-      await syncUpcomingMatches();
-      await syncFromSportradar();
-    } catch (e) {
-      logger.error('[Cron matches]', e.message);
-    }
-  }, MATCHES_SYNC_INTERVAL, 'matches');
-
-  startAutoSettlementCron();
-  startMaintenanceCron();
-} else {
-  logger.info('[Cron] Désactivés (DISABLE_CRONS=1)');
-}
-
 /* ═══════════════════════════════════════════════════════════════════ */
-/* DÉMARRAGE + ARRÊT PROPRE                                          */
+/* ARRÊT PROPRE                                                      */
 /* ═══════════════════════════════════════════════════════════════════ */
-let server;
-
-(async () => {
-  try {
-    await initDb();
-
-    server = app.listen(PORT, '127.0.0.1', () => {
-      logger.info('═══════════════════════════════════════════');
-      logger.info(`🚀 Me2/3Legend v${APP_VERSION}`);
-      logger.info(`📡 Port : ${PORT}`);
-      logger.info(`🎯 Sportradar : ${process.env.SPORTRADAR_API_KEY ? '✅' : '❌'}`);
-      logger.info(`🎯 OddsPapi   : ${process.env.ODDSPAPI_KEY ? '✅' : '❌'}`);
-      logger.info(`🎯 CinetPay   : ${process.env.CINETPAY_MODE || 'sandbox'}`);
-      logger.info('═══════════════════════════════════════════');
-
-      if (process.env.DISABLE_CRONS !== '1') {
-        setTimeout(() => {
-          syncScoresAndValidate().catch(e => logger.error('[Init scores]', e.message));
-          syncUpcomingMatches().catch(e => logger.error('[Init matches]', e.message));
-        }, 10000);
-      }
-    });
-
-  } catch (e) {
-    logger.error('❌ Échec démarrage :', e.message);
-    process.exit(1);
-  }
-})();
-
-/* ⭐ v6.2.9 : arrêt propre sur SIGTERM / SIGINT */
 async function shutdown(signal) {
   logger.info(`[Server] ${signal} reçu, arrêt en cours...`);
 

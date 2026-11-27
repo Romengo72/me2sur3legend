@@ -180,7 +180,12 @@
     if (!amountEl || !pwdEl || !btn) return;
 
     const amount = Number(amountEl.value);
-    const phone = phoneEl ? phoneEl.value.trim() : '';
+    const phone = phoneEl ? phoneEl.value.trim().replace(/\D/g, '') : '';
+
+    // Validation stricte : 9 chiffres (Cameroun) ou 8+ pour autres pays
+    if (!phone || phone.length < 8) {
+    return UI.toast('Numéro Mobile Money valide requis (ex: 690000000)', 'warn');
+    }
     const password = pwdEl.value;
 
     if (!amount || amount < RETRAIT_MIN) return UI.toast(`Minimum ${RETRAIT_MIN} XAF`, 'warn');

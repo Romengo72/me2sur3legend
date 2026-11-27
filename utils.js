@@ -196,29 +196,39 @@ async function createSession(email, req, res) {
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + SESSION_TTL_MS);
   await pool.query(
-    `INSERT INTO sessions(token, user_email, expires_at, user_agent, ip) VALUES ($1, $2, $3, $4, $5)`,
-    [token, email, expires, req.headers['user-agent'] || null, req.ip]);
+    `INSERT INTO sessions(token, user_email, expires_at, user_agent, ip) VALUES ($1, $2, $3, $4, $5)`, 
+    [token, email, expires, req.headers['user-agent'] || null, req.ip]
+  );
 
   const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
   const isHttps = (proto === 'https' || req.secure === true || APP_URL_IS_HTTPS);
   const secure = IS_PRODUCTION ? isHttps : false;
-
-  res.cookie('auth_token', token, {
-  httpOnly: true,
-  sameSite: 'none',
-  secure: true,
-  maxAge: SESSION_TTL_MS,
-  path: '/'
-});
-
-res.cookie('csrf_token', csrfToken, {
-  httpOnly: false,
-  sameSite: 'none',
-  secure: true,
-  maxAge: SESSION_TTL_MS,
-  path: '/'
-});
-
+  
+  const cookieOptions = { 
+    httpOnly: true, 
+    sameSite: 'none',  // ⭐ CORRIGÉ : 'none' est requis pour HTTPS cross-origin
+    secure,            // En prod HTTPS, 'none' exige 'secure: true'
+    maxAge: SESSION_TTL_MS, 
+    path: '/' 
+  };
+  
+  if (COOKIE_DOMAIN) cookieOptions.domain = COOKIE_DOMAIN;
+  
+  // ⭐ On envoie le cookie de session
+  res.cookie('auth_token', token, cookieOptions);
+  
+  // ⭐ On génère et envoie le cookie CSRF si pas déjà présent
+  if (!req.cookies?.csrf_token) {
+    const csrfToken = crypto.randomBytes(32).toString('hex');
+    res.cookie('csrf_token', csrfToken, {
+      httpOnly: false,  // Le JS du frontend doit pouvoir lire ce cookie
+      sameSite: 'none',
+      secure,
+      maxAge: SESSION_TTL_MS,
+      path: '/'
+    });
+  }
+  
   return token;
 }
 

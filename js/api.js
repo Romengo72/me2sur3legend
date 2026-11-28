@@ -89,9 +89,9 @@ window.API = (() => {
     login: (e, p) => req('/login',  { method: 'POST', body: { email: e, password: p } }),
     logout:()     => req('/logout', { method: 'POST' }),
 
-    withdrawal: {
-      requestOtp: (amount, devise, password) =>
-        req('/withdrawal/request-otp', { method: 'POST', body: { amount, devise, password } }),
+       withdrawal: {
+      requestOtp: (amount, devise, password, phone) =>
+        req('/withdrawal/request-otp', { method: 'POST', body: { amount, devise, password, phone } }),
       confirm:    (code) =>
         req('/withdrawal/confirm',    { method: 'POST', body: { code } }),
       audit:      () => req('/withdrawal/audit')

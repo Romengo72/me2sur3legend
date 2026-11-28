@@ -1,5 +1,5 @@
 // C:\Me\AppMoney\MeParisPortifs\server.js
-// v6.3.0 — Port ouvert AVANT initDb (compatibilité Render)
+// v6.3.0 — Optimisé pour Render (Port ouvert avant initDb, 0.0.0.0)
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
@@ -35,9 +35,6 @@ const PORT = Number(process.env.PORT || 3000);
 const SCORES_SYNC_INTERVAL = 30 * 60 * 1000;
 const MATCHES_SYNC_INTERVAL = 2 * 60 * 60 * 1000;
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* MIDDLEWARES                                                       */
-/* ═══════════════════════════════════════════════════════════════════ */
 if (process.env.BEHIND_PROXY === '1') {
   app.set('trust proxy', 1);
   logger.info('[Server] trust proxy activé (BEHIND_PROXY=1)');
@@ -64,9 +61,7 @@ app.use((req, res, next) => {
 const { csrfProtection } = require('./utils');
 app.use(csrfProtection);
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* HEALTH (indépendant de la DB — critique pour Render)              */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* Health (indépendant de la DB — critique pour Render) */
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', version: APP_VERSION, uptime: process.uptime() });
 });
@@ -74,9 +69,6 @@ app.get('/health', (_req, res) => {
 app.get('/api/health', (_req, res) => res.json({ ok: true, version: APP_VERSION }));
 app.get('/api/version', (_req, res) => res.json({ version: APP_VERSION }));
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* CONFIG JS (version injectée)                                      */
-/* ═══════════════════════════════════════════════════════════════════ */
 app.get('/js/config.js', (_req, res) => {
   const full = path.join(__dirname, 'js', 'config.js');
   if (!fs.existsSync(full)) return res.status(404).send('// config.js manquant');
@@ -87,9 +79,7 @@ app.get('/js/config.js', (_req, res) => {
   res.send(content);
 });
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* CHARGEMENT DES ROUTEURS                                           */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* Chargement des routeurs */
 function loadRoute(routePath, label) {
   try { return require(routePath); }
   catch (e) {
@@ -125,41 +115,42 @@ Object.entries(routes).forEach(([key, router]) => {
   }
 });
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* TRADUCTION (optionnel)                                            */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* Traduction (optionnel) */
 if (Translate) {
-  const translateClient = new Translate({
-    projectId: process.env.GOOGLE_PROJECT_ID,
-    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
-  });
+  // ⭐ Sur Render, les credentials Google se configurent via la variable GOOGLE_APPLICATION_CREDENTIALS
+  // ou via le JSON brut dans une variable. Cette init est robuste.
+  let translateClient;
+  try {
+    translateClient = new Translate();
+  } catch (e) {
+    logger.warn('⚠️ Erreur d\'initialisation Google Translate :', e.message);
+  }
 
-  app.post('/api/translate', async (req, res) => {
-    try {
-      const { text, target } = req.body;
-      if (!text || typeof text !== 'string' || text.trim().length === 0) {
-        return res.status(400).json({ error: 'Texte manquant ou vide' });
+  if (translateClient) {
+    app.post('/api/translate', async (req, res) => {
+      try {
+        const { text, target } = req.body;
+        if (!text || typeof text !== 'string' || text.trim().length === 0) {
+          return res.status(400).json({ error: 'Texte manquant ou vide' });
+        }
+        if (!target || !['fr', 'en', 'ru', 'zh'].includes(target)) {
+          return res.status(400).json({ error: 'Langue cible invalide' });
+        }
+        const [translation] = await translateClient.translate(text, target);
+        res.json({ translatedText: translation });
+      } catch (error) {
+        logger.error(`[Translate] ❌ ${error.message}`);
+        res.json({ translatedText: req.body.text });
       }
-      if (!target || !['fr', 'en', 'ru', 'zh'].includes(target)) {
-        return res.status(400).json({ error: 'Langue cible invalide' });
-      }
-      logger.info(`[Translate] "${text.substring(0, 30)}..." -> ${target}`);
-      const [translation] = await translateClient.translate(text, target);
-      res.json({ translatedText: translation });
-    } catch (error) {
-      logger.error(`[Translate] ❌ ${error.message}`);
-      res.json({ translatedText: req.body.text });
-    }
-  });
-  logger.info('✅ Service de traduction actif.');
+    });
+    logger.info('✅ Service de traduction actif.');
+  }
 } else {
   app.post('/api/translate', (req, res) => res.json({ translatedText: req.body.text }));
   logger.warn('⚠️ Service de traduction désactivé.');
 }
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* FICHIERS STATIQUES                                                 */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* Fichiers statiques */
 ['css', 'assets', 'uploads', 'pages'].forEach(dir => {
   const p = path.join(__dirname, dir);
   if (fs.existsSync(p)) app.use(`/${dir}`, express.static(p));
@@ -174,9 +165,7 @@ if (fs.existsSync(jsDir)) {
   }));
 }
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* PAGES HTML                                                        */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* Pages HTML */
 function sendPage(file, res) {
   const full = path.join(__dirname, file);
   if (!fs.existsSync(full)) return res.status(404).send(`<h1>404 — ${file} introuvable</h1>`);
@@ -199,9 +188,6 @@ app.get('/pages/:name', (req, res) => {
   res.sendFile(full);
 });
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* 404 API + gestion d'erreur                                       */
-/* ═══════════════════════════════════════════════════════════════════ */
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Route API inconnue.' });
 });
@@ -216,12 +202,10 @@ app.use((err, req, res, _next) => {
   });
 });
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* DÉMARRAGE — PORT OUVERT IMMÉDIATEMENT (compatibilité Render)      */
-/* ═══════════════════════════════════════════════════════════════════ */
+/* ⭐ DÉMARRAGE OPTIMISÉ POUR RENDER ⭐ */
 let server;
 
-// 1. Ouvrir le port TOUT DE SUITE
+// 1. Ouvrir le port IMMÉDIATEMENT sur 0.0.0.0
 server = app.listen(PORT, '0.0.0.0', () => {
   logger.info('═══════════════════════════════════════════');
   logger.info(`🚀 Me2/3Legend v${APP_VERSION}`);
@@ -235,26 +219,29 @@ server = app.listen(PORT, '0.0.0.0', () => {
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 120000;
 
-// 2. Initialiser la DB en arrière-plan (ne bloque pas l'écoute)
+// 2. Initialiser la DB en arrière-plan
 initDb()
   .then(() => {
     logger.info('✔ Base de données initialisée.');
 
-    // 3. Démarrer les crons SEULEMENT si la DB est prête
     if (process.env.DISABLE_CRONS !== '1') {
-      safeInterval(syncScoresAndValidate, SCORES_SYNC_INTERVAL, 'scores');
-      safeInterval(async () => {
+      setInterval(async () => {
+        try { await syncScoresAndValidate(); }
+        catch (e) { logger.error('[Cron scores]', e.message); }
+      }, SCORES_SYNC_INTERVAL);
+
+      setInterval(async () => {
         try {
           await syncUpcomingMatches();
           await syncFromSportradar();
         } catch (e) {
           logger.error('[Cron matches]', e.message);
         }
-      }, MATCHES_SYNC_INTERVAL, 'matches');
+      }, MATCHES_SYNC_INTERVAL);
+
       startAutoSettlementCron();
       startMaintenanceCron();
 
-      // Premier cycle après 10s
       setTimeout(() => {
         syncScoresAndValidate().catch(e => logger.error('[Init scores]', e.message));
         syncUpcomingMatches().catch(e => logger.error('[Init matches]', e.message));
@@ -265,39 +252,22 @@ initDb()
   })
   .catch(e => {
     logger.error('❌ Échec init DB (le serveur reste joignable) :', e.message);
-    // ⚠️ NE PAS process.exit(1) : Render verrait un service mort
   });
 
-/* ═══════════════════════════════════════════════════════════════════ */
-/* CRON SÉCURISÉS                                                    */
-/* ═══════════════════════════════════════════════════════════════════ */
-function safeInterval(fn, ms, label) {
-  return setInterval(async () => {
-    try { await fn(); }
-    catch (e) { logger.error(`[Cron ${label}]`, e.message); }
-  }, ms);
-}
-
-/* ═══════════════════════════════════════════════════════════════════ */
-/* ARRÊT PROPRE                                                      */
-/* ═══════════════════════════════════════════════════════════════════ */
 async function shutdown(signal) {
   logger.info(`[Server] ${signal} reçu, arrêt en cours...`);
-
   if (server) {
     server.close((err) => {
       if (err) logger.error('[Server] Erreur fermeture HTTP:', err.message);
       else logger.info('[Server] HTTP fermé.');
     });
   }
-
   try {
     await pool.end();
     logger.info('[Server] Pool PostgreSQL fermé.');
   } catch (e) {
     logger.error('[Server] Erreur fermeture pool:', e.message);
   }
-
   setTimeout(() => process.exit(0), 500);
 }
 
